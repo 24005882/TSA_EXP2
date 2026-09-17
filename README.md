@@ -1,96 +1,92 @@
-# Ex.No: 1 B                    CONVERSION OF NON STATIONARY TO STATIONARY DATA
+# Ex.No: 02 LINEAR AND POLYNOMIAL TREND ESTIMATION
+Date:15/8/26
+### AIM:
+To Implement Linear and Polynomial Trend Estiamtion Using Python.
 
-## AIM:
-To perform regular differncing,seasonal adjustment and log transformatio on Gold Price Prediction.
+### ALGORITHM:
+Import necessary libraries (NumPy, Matplotlib)
 
-## ALGORITHM:
-1. Import the required packages like pandas and numpy
-2. Read the data using the pandas
-3. Perform the data preprocessing if needed and apply regular differncing,seasonal adjustment,log transformation.
-4. Plot the data according to need, before and after regular differncing,seasonal adjustment,log transformation.
-5. Display the overall results.
-   
-## PROGRAM:
-### Importing the necessary Packages:
-```
-Tharun M
-212224230288
-```
+Load the dataset
+
+Calculate the linear trend values using least square method
+
+Calculate the polynomial trend values using least square method
+
+End the program
+### PROGRAM:
+
 ```
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-```
 
-### Loading the dataset:
-```
-data=pd.read_csv('Gold Price Prediction.csv')
-```
-### Convert 'Date' column to datetime format
-```
-data['Date'] = pd.to_datetime(data['Date'])
-```
-### Set 'Date' as the index
-```
-data.set_index('Date', inplace=True)
-```
-### Create a figure and set of subplots
-```
-plt.figure(figsize=(12, 10))
-```
-### Plot 1: Gold Price Today
-```
-plt.subplot(3, 1, 1)  # 3 rows, 1 column, 1st subplot
-plt.plot(data.index, data['Price Today'], label='Gold Price Today', color='blue')
-plt.title('Gold Price Today Over Time')
-plt.xlabel('Date')
-plt.ylabel('Gold Price')
+# Load Tomato dataset
+file_path = "/content/Month_Value_1.csv"
+data = pd.read_csv(file_path)
+
+# Convert Period column to datetime and assign to Date
+data['Date'] = pd.to_datetime(data['Period'])
+
+# Extract Year
+data['Year'] = data['Date'].dt.year
+
+# Aggregate yearly average prices
+yearly_data = data.groupby('Year')['Average_cost'].mean().reset_index()
+yearly_data.rename(columns={'Average_cost': 'Price'}, inplace=True)
+
+# Drop rows with NaN prices before extracting values for trend calculation
+yearly_data = yearly_data.dropna(subset=['Price'])
+
+# Extract values
+years = yearly_data['Year'].tolist()
+prices = yearly_data['Price'].tolist()
+
+# Prepare values for linear regression
+X = [i - (len(years) // 2) for i in range(len(years))]
+x2 = [i**2 for i in X]
+xy = [i * j for i, j in zip(X, prices)]
+
+n = len(years)
+b = (n * sum(xy) - sum(prices) * sum(X)) / (n * sum(x2) - (sum(X) ** 2))
+a = (sum(prices) - b * sum(X)) / n
+linear_trend = [a + b * Xi for Xi in X]
+
+# Polynomial Trend Estimation (Degree 2)
+x3 = [i**3 for i in X]
+x4 = [i**4 for i in X]
+x2y = [i * j for i, j in zip(x2, prices)]
+
+coeff = [[n, sum(X), sum(x2)],
+         [sum(X), sum(x2), sum(x3)],
+         [sum(x2), sum(x3), sum(x4)]]
+
+Y = [sum(prices), sum(xy), sum(x2y)]
+A = np.array(coeff)
+B = np.array(Y)
+
+solution = np.linalg.solve(A, B)
+a_poly, b_poly, c_poly = solution
+poly_trend = [a_poly + b_poly * Xi + c_poly * (Xi**2) for Xi in X]
+
+# Display trend equations
+print(f"Linear Trend: y = {a:.2f} + {b:.2f}x")
+print(f"Polynomial Trend: y = {a_poly:.2f} + {b_poly:.2f}x + {c_poly:.2f}x²")
+
+# Plot results
+plt.figure(figsize=(12,6))
+plt.plot(years, prices, 'bo-', label="Actual Avg Price")
+plt.plot(years, linear_trend, 'k--', label="Linear Trend")
+plt.plot(years, poly_trend, 'r-', label="Polynomial Trend")
+plt.title("Tomato Price Trend Estimation")
+plt.xlabel("Year")
+plt.ylabel("Average Price")
 plt.legend()
 plt.grid(True)
-```
-### Plot 2: Twenty Moving Average vs. Fifty Moving Average
-```
-plt.subplot(3, 1, 2)  # 3 rows, 1 column, 2nd subplot
-plt.plot(data.index, data['Twenty Moving Average'], label='20-Day Moving Average', color='orange')
-plt.plot(data.index, data['Fifty Day Moving Average'], label='50-Day Moving Average', color='green')
-plt.title('20-Day vs 50-Day Moving Averages')
-plt.xlabel('Date')
-plt.ylabel('Price')
-plt.legend()
-plt.grid(True)
-```
-### Plot 3: Volume Over Time
-```
-plt.subplot(3, 1, 3)  # 3 rows, 1 column, 3rd subplot
-plt.bar(data.index, data['Volume '], label='Trading Volume ', color='purple')
-plt.title('Trading Volume Over Time')
-plt.xlabel('Date')
-plt.ylabel('Volume ')
-plt.legend()
-plt.grid(True)
-```
-### Adjust layout and show the plots
-```
-plt.tight_layout()
 plt.show()
-
 ```
-
-## OUTPUT:
-### rading Volume Over Time:
-<img width="869" height="275" alt="image" src="https://github.com/user-attachments/assets/838594ad-122b-4c4f-af0b-3f6851e55131" />
-
-
-
-### Twenty Moving Average vs. Fifty Moving Average
-<img width="873" height="252" alt="image" src="https://github.com/user-attachments/assets/6ac0cb19-2d9e-4838-a890-76dc6b02daed" />
-
-### Gold Price Today
-
-
-<img width="892" height="295" alt="image" src="https://github.com/user-attachments/assets/853ccea0-5f7d-4dd2-9bb3-ae64912d7ad9" />
+### OUTPUT
+<img width="1326" height="760" alt="image" src="https://github.com/user-attachments/assets/c4fa2dd4-6f22-4484-89c4-09015831021b" />
 
 
 ### RESULT:
-Thus we have created the python code for the conversion of non stationary to stationary data on Gold Price Prediction
-data.
+Thus the python program for linear and Polynomial Trend Estiamtion has been executed successfully.
